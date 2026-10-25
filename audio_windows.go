@@ -359,23 +359,71 @@ func (b *winBackend) withMaster(fn func(ev uintptr)) {
 	fn(ev)
 }
 
-func (b *winBackend) AdjustMaster(delta float64) {
+var procKeybdEvent = windows.NewLazySystemDLL("user32.dll").NewProc("keybd_event")
+
+const (
+	vkVolumeMute = 0xAD
+	vkVolumeDown = 0xAE
+	vkVolumeUp   = 0xAF
+)
+
+// pressKey sends a media key press, so Windows shows its own volume popup.
+func pressKey(vk uintptr) {
+	const extended, keyUp = 0x1, 0x2
+	procKeybdEvent.Call(vk, 0, extended, 0)
+	procKeybdEvent.Call(vk, 0, extended|keyUp, 0)
+}
+
+func (b *winBackend) masterState() (level float64, muted bool) {
 	b.withMaster(func(ev uintptr) {
-		var level float32
-		comCall(ev, 9, uintptr(unsafe.Pointer(&level))) // GetMasterVolumeLevelScalar
-		next := math.Max(0, math.Min(1, math.Round((float64(level)+delta)*100)/100))
-		comCall(ev, 7, uintptr(math.Float32bits(float32(next))), 0) // SetMasterVolumeLevelScalar
+		var l float32
+		var m int32
+		comCall(ev, 9, uintptr(unsafe.Pointer(&l)))  // GetMasterVolumeLevelScalar
+		comCall(ev, 15, uintptr(unsafe.Pointer(&m))) // GetMute
+		level, muted = float64(l), m != 0
 	})
+	return
+}
+
+// AdjustMaster uses the volume keys (Windows steps 2% per press) so the
+// Windows volume popup appears. If the key presses are blocked (e.g. an
+// admin window is focused), it falls back to setting the volume directly.
+func (b *winBackend) AdjustMaster(delta float64) {
+	before, _ := b.masterState()
+	presses := int(math.Round(math.Abs(delta) * 100 / 2))
+	if presses < 1 {
+		presses = 1
+	}
+	vk := uintptr(vkVolumeUp)
+	if delta < 0 {
+		vk = vkVolumeDown
+	}
+	for i := 0; i < presses; i++ {
+		pressKey(vk)
+	}
+	if (delta > 0 && before >= 1) || (delta < 0 && before <= 0) {
+		return
+	}
+	time.Sleep(60 * time.Millisecond)
+	if after, _ := b.masterState(); math.Abs(after-before) < 0.001 {
+		b.withMaster(func(ev uintptr) {
+			next := math.Max(0, math.Min(1, math.Round((before+delta)*100)/100))
+			comCall(ev, 7, uintptr(math.Float32bits(float32(next))), 0) // SetMasterVolumeLevelScalar
+		})
+	}
 }
 
 func (b *winBackend) ToggleMasterMute() {
-	b.withMaster(func(ev uintptr) {
-		var mute int32
-		comCall(ev, 15, uintptr(unsafe.Pointer(&mute))) // GetMute
-		var m uintptr
-		if mute == 0 {
-			m = 1
-		}
-		comCall(ev, 14, m, 0) // SetMute
-	})
+	_, before := b.masterState()
+	pressKey(vkVolumeMute)
+	time.Sleep(60 * time.Millisecond)
+	if _, after := b.masterState(); after == before {
+		b.withMaster(func(ev uintptr) {
+			var m uintptr
+			if !before {
+				m = 1
+			}
+			comCall(ev, 14, m, 0) // SetMute
+		})
+	}
 }

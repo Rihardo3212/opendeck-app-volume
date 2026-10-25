@@ -70,6 +70,9 @@ type Plugin struct {
 	selected   string
 
 	audio *AudioWorker
+
+	masterPending float64 // knob turns not yet sent to Windows (coalesced)
+	masterQueued  bool
 }
 
 func main() {
@@ -172,7 +175,7 @@ func (p *Plugin) handle(ev inEvent) {
 		case actDial:
 			p.adjust(ev.Context, delta)
 		case actMaster:
-			p.audio.Do(func(b Backend) { b.AdjustMaster(delta) })
+			p.adjustMaster(delta)
 		}
 	case "dialDown":
 		switch ev.Action {
@@ -325,4 +328,22 @@ func (p *Plugin) refreshSlots() {
 		}
 		p.send(map[string]any{"event": "setImage", "context": s.context, "payload": map[string]any{"image": render.DataURL(img), "target": 0}})
 	}
+}
+
+// adjustMaster coalesces fast knob turns into one change. Called with p.mu held.
+func (p *Plugin) adjustMaster(delta float64) {
+	p.masterPending += delta
+	if p.masterQueued {
+		return
+	}
+	p.masterQueued = true
+	p.audio.Do(func(b Backend) {
+		p.mu.Lock()
+		d := p.masterPending
+		p.masterPending, p.masterQueued = 0, false
+		p.mu.Unlock()
+		if d != 0 {
+			b.AdjustMaster(d)
+		}
+	})
 }

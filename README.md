@@ -23,7 +23,7 @@ Built and tested with an **Ajazz AKP03E (rev. 2)** using the [opendeck-akp03](ht
 |---|---|---|
 | App Slot | Key | Shows an app that's playing sound. Press to select, press again to mute. |
 | Selected App Volume (knob) | Knob | Turn to change the selected app's volume (2% per tick by default). Press to mute. |
-| Master Volume (knob) | Knob | Turn to change the computer's overall volume (default output device). Press to mute. |
+| Master Volume (knob) | Knob | Turn to change the computer's overall volume (default output device). Press to mute. Shows the Windows volume popup. |
 | Selected App Volume Up / Down | Key | Changes the selected app's volume (5% per press by default). |
 | Selected App Mute | Key | Mutes or unmutes the selected app. |
 
