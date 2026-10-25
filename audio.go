@@ -21,6 +21,9 @@ type Backend interface {
 	Snapshot() []AppInfo
 	AdjustVolume(key string, delta float64)
 	ToggleMute(key string)
+	// Master (default output device) volume
+	AdjustMaster(delta float64)
+	ToggleMasterMute()
 }
 
 // AudioWorker owns the backend on one OS thread (COM likes that) and polls it.

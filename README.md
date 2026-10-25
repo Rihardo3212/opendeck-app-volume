@@ -6,6 +6,7 @@ A Windows plugin for [OpenDeck](https://github.com/nekename/OpenDeck) that turns
 - **Press** a key to select that app (white dashed border), press it again to mute
 - **Turn a knob** to change the selected app's volume, press the knob to mute
 - The volume % is shown in the corner of each icon
+- Optional **master volume knob** for the whole computer
 
 Built and tested with an **Ajazz AKP03E (rev. 2)** using the [opendeck-akp03](https://github.com/4ndv/opendeck-akp03) device plugin, but it uses the standard Stream Deck SDK, so it should work with other devices supported by OpenDeck.
 
@@ -22,6 +23,7 @@ Built and tested with an **Ajazz AKP03E (rev. 2)** using the [opendeck-akp03](ht
 |---|---|---|
 | App Slot | Key | Shows an app that's playing sound. Press to select, press again to mute. |
 | Selected App Volume (knob) | Knob | Turn to change the selected app's volume (2% per tick by default). Press to mute. |
+| Master Volume (knob) | Knob | Turn to change the computer's overall volume (default output device). Press to mute. |
 | Selected App Volume Up / Down | Key | Changes the selected app's volume (5% per press by default). |
 | Selected App Mute | Key | Mutes or unmutes the selected app. |
 

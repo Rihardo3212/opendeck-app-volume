@@ -80,6 +80,9 @@ func main() {
 	// select first key then press it again -> mute
 	send(map[string]any{"event": "keyDown", "action": "com.rihardo.appvolume.slot", "context": ctx(0, "Keypad"), "device": "dev", "payload": map[string]any{}})
 	send(map[string]any{"event": "keyDown", "action": "com.rihardo.appvolume.slot", "context": ctx(0, "Keypad"), "device": "dev", "payload": map[string]any{}})
+	send(map[string]any{"event": "willAppear", "action": "com.rihardo.appvolume.master", "context": ctx(1, "Encoder"), "device": "dev", "payload": map[string]any{"settings": map[string]any{}, "coordinates": map[string]any{"row": 0, "column": 1}, "controller": "Encoder"}})
+	send(map[string]any{"event": "dialRotate", "action": "com.rihardo.appvolume.master", "context": ctx(1, "Encoder"), "device": "dev", "payload": map[string]any{"ticks": -3, "settings": map[string]any{}}})
+	send(map[string]any{"event": "dialDown", "action": "com.rihardo.appvolume.master", "context": ctx(1, "Encoder"), "device": "dev", "payload": map[string]any{}})
 	time.Sleep(4 * time.Second) // Steam goes quiet but stays (30s window)
 	mu.Lock()
 	fmt.Println("counts:", counts)

@@ -25,6 +25,7 @@ const (
 	actUp        = pluginID + ".up"
 	actDown      = pluginID + ".down"
 	actMute      = pluginID + ".mute"
+	actMaster    = pluginID + ".master"
 	keepVisible  = 30 * time.Second // keep an app on its key this long after it goes quiet
 	defaultDial  = 2.0              // % per knob tick
 	defaultKeyUp = 5.0              // % per key press
@@ -163,12 +164,22 @@ func (p *Plugin) handle(ev inEvent) {
 			p.toggleMute(ev.Context)
 		}
 	case "dialRotate":
-		if ev.Action == actDial && pl.Ticks != 0 {
-			p.adjust(ev.Context, float64(pl.Ticks)*step(pl.Settings, defaultDial)/100)
+		if pl.Ticks == 0 {
+			return
+		}
+		delta := float64(pl.Ticks) * step(pl.Settings, defaultDial) / 100
+		switch ev.Action {
+		case actDial:
+			p.adjust(ev.Context, delta)
+		case actMaster:
+			p.audio.Do(func(b Backend) { b.AdjustMaster(delta) })
 		}
 	case "dialDown":
-		if ev.Action == actDial {
+		switch ev.Action {
+		case actDial:
 			p.toggleMute(ev.Context)
+		case actMaster:
+			p.audio.Do(func(b Backend) { b.ToggleMasterMute() })
 		}
 	}
 }

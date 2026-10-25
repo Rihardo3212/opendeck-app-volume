@@ -24,6 +24,7 @@ var (
 	iidIMMDeviceEnumerator   = mustGUID("{A95664D2-9614-4F35-A746-DE8DB63617E6}")
 	iidIAudioSessionManager2 = mustGUID("{77AA99A0-1BD6-484F-8BC7-2C654C9A9B6F}")
 	iidIAudioSessionControl2 = mustGUID("{BFB7FF88-7239-4FC9-8FA2-07C950BE9C6D}")
+	iidIAudioEndpointVolume  = mustGUID("{5CDF2C82-841E-4546-9722-0CF74078229A}")
 	iidISimpleAudioVolume    = mustGUID("{87CE5498-68D6-44E5-9215-6DA47EF883D8}")
 )
 
@@ -340,4 +341,41 @@ func fileDescription(path string) string {
 		}
 	}
 	return ""
+}
+
+// withMaster runs fn with the default output device's IAudioEndpointVolume.
+func (b *winBackend) withMaster(fn func(ev uintptr)) {
+	var dev uintptr
+	// GetDefaultAudioEndpoint(eRender, eMultimedia)
+	if failed(comCall(b.enumerator, 4, eRender, 1, uintptr(unsafe.Pointer(&dev)))) || dev == 0 {
+		return
+	}
+	defer comRelease(dev)
+	var ev uintptr
+	if failed(comCall(dev, 3, uintptr(unsafe.Pointer(&iidIAudioEndpointVolume)), clsctxAll, 0, uintptr(unsafe.Pointer(&ev)))) || ev == 0 {
+		return
+	}
+	defer comRelease(ev)
+	fn(ev)
+}
+
+func (b *winBackend) AdjustMaster(delta float64) {
+	b.withMaster(func(ev uintptr) {
+		var level float32
+		comCall(ev, 9, uintptr(unsafe.Pointer(&level))) // GetMasterVolumeLevelScalar
+		next := math.Max(0, math.Min(1, math.Round((float64(level)+delta)*100)/100))
+		comCall(ev, 7, uintptr(math.Float32bits(float32(next))), 0) // SetMasterVolumeLevelScalar
+	})
+}
+
+func (b *winBackend) ToggleMasterMute() {
+	b.withMaster(func(ev uintptr) {
+		var mute int32
+		comCall(ev, 15, uintptr(unsafe.Pointer(&mute))) // GetMute
+		var m uintptr
+		if mute == 0 {
+			m = 1
+		}
+		comCall(ev, 14, m, 0) // SetMute
+	})
 }

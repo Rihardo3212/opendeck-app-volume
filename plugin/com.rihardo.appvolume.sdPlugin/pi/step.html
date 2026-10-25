@@ -18,7 +18,7 @@
     uuid = inUUID;
     const ai = JSON.parse(actionInfo);
     settings = (ai.payload && ai.payload.settings) || {};
-    const isDial = (ai.action || '').endsWith('.dial');
+    const isDial = /\.(dial|master)$/.test(ai.action || '');
     const def = isDial ? 2 : 5;
     document.getElementById('hint').textContent = 'Default: ' + def + '%';
     const input = document.getElementById('step');

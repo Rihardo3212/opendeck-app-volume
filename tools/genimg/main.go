@@ -22,7 +22,7 @@ func main() {
 	icons := map[string]int{
 		"plugin": render.GlyphSpeaker, "category": render.GlyphSpeaker,
 		"slot": render.GlyphGrid, "dial": render.GlyphKnob,
-		"up": render.GlyphPlus, "down": render.GlyphMinus, "mute": render.GlyphMute,
+		"up": render.GlyphPlus, "down": render.GlyphMinus, "mute": render.GlyphMute, "master": render.GlyphSpeaker,
 	}
 	for name, g := range icons {
 		write(dir, name+".png", render.PNG(render.Glyph(g, 28, nil, white)))
@@ -34,7 +34,7 @@ func main() {
 	}{
 		"key-slot": {render.GlyphSpeaker, "App"}, "key-dial": {render.GlyphKnob, ""},
 		"key-up": {render.GlyphPlus, "Vol +"}, "key-down": {render.GlyphMinus, "Vol -"},
-		"key-mute": {render.GlyphMute, "Mute"},
+		"key-mute": {render.GlyphMute, "Mute"}, "key-master": {render.GlyphSpeaker, "Master"},
 	}
 	for name, k := range keys {
 		write(dir, name+".png", render.PNG(render.LabeledKey(k.g, k.label)))

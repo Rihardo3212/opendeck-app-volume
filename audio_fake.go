@@ -10,12 +10,14 @@ import (
 
 // fakeBackend lets the plugin run on non-Windows machines for testing.
 type fakeBackend struct {
-	apps  map[string]*AppInfo
-	start time.Time
+	apps   map[string]*AppInfo
+	start  time.Time
+	master float64
+	mMuted bool
 }
 
 func newBackend() (Backend, error) {
-	f := &fakeBackend{apps: map[string]*AppInfo{}, start: time.Now()}
+	f := &fakeBackend{apps: map[string]*AppInfo{}, start: time.Now(), master: 0.5}
 	for i, n := range []string{"Spotify", "Discord", "Firefox", "Steam"} {
 		f.apps[n] = &AppInfo{Key: n, Name: n, Volume: 0.2 + 0.2*float64(i), Active: true}
 	}
@@ -45,4 +47,14 @@ func (f *fakeBackend) ToggleMute(key string) {
 	if a, ok := f.apps[key]; ok {
 		a.Muted = !a.Muted
 	}
+}
+
+func (f *fakeBackend) AdjustMaster(d float64) {
+	f.master = math.Max(0, math.Min(1, f.master+d))
+	logf("master volume %.2f", f.master)
+}
+
+func (f *fakeBackend) ToggleMasterMute() {
+	f.mMuted = !f.mMuted
+	logf("master muted %v", f.mMuted)
 }
