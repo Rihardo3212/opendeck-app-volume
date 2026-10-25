@@ -1,0 +1,65 @@
+{
+  "Name": "App Volume",
+  "Author": "Rihardo",
+  "Version": "1.1.0",
+  "Description": "Shows the apps that are playing sound on your keys. Press a key to pick an app, then turn a knob to change its volume.",
+  "Icon": "imgs/plugin",
+  "Category": "App Volume",
+  "CategoryIcon": "imgs/category",
+  "CodePathWin": "appvolume.exe",
+  "CodePath": "appvolume.exe",
+  "SDKVersion": 2,
+  "Software": { "MinimumVersion": "6.0" },
+  "OS": [ { "Platform": "windows", "MinimumVersion": "10" } ],
+  "Actions": [
+    {
+      "Name": "App Slot",
+      "UUID": "com.rihardo.appvolume.slot",
+      "Icon": "imgs/slot",
+      "Tooltip": "Shows an app that is playing sound. Press to select it; press again to mute.",
+      "Controllers": [ "Keypad" ],
+      "SupportedInMultiActions": false,
+      "States": [ { "Image": "imgs/key-slot", "ShowTitle": false } ]
+    },
+    {
+      "Name": "Selected App Volume (knob)",
+      "UUID": "com.rihardo.appvolume.dial",
+      "Icon": "imgs/dial",
+      "Tooltip": "Turn to change the selected app's volume. Press to mute.",
+      "Controllers": [ "Encoder" ],
+      "PropertyInspectorPath": "pi/step.html",
+      "SupportedInMultiActions": false,
+      "Encoder": {
+        "layout": "$B1",
+        "TriggerDescription": { "Rotate": "Volume", "Push": "Mute" }
+      },
+      "States": [ { "Image": "imgs/key-dial" } ]
+    },
+    {
+      "Name": "Selected App Volume Up",
+      "UUID": "com.rihardo.appvolume.up",
+      "Icon": "imgs/up",
+      "Tooltip": "Raises the selected app's volume.",
+      "Controllers": [ "Keypad" ],
+      "PropertyInspectorPath": "pi/step.html",
+      "States": [ { "Image": "imgs/key-up" } ]
+    },
+    {
+      "Name": "Selected App Volume Down",
+      "UUID": "com.rihardo.appvolume.down",
+      "Icon": "imgs/down",
+      "Tooltip": "Lowers the selected app's volume.",
+      "Controllers": [ "Keypad" ],
+      "PropertyInspectorPath": "pi/step.html",
+      "States": [ { "Image": "imgs/key-down" } ]
+    },
+    {
+      "Name": "Selected App Mute",
+      "UUID": "com.rihardo.appvolume.mute",
+      "Icon": "imgs/mute",
+      "Tooltip": "Mutes or unmutes the selected app.",
+      "Controllers": [ "Keypad" ],
+      "States": [ { "Image": "imgs/key-mute" } ]
+    }
+  ]
+}
